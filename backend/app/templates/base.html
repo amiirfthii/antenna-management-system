@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}سیستم مدیریت آنتن{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user %}
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h2>سیستم مدیریت آنتن</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard" class="nav-link">داشبورد</a></li>
+                <li><a href="/repairs" class="nav-link">تعمیرات</a></li>
+                <li><a href="/inventory" class="nav-link">موجودی</a></li>
+                {% if user.user_type in ['admin', 'owner'] %}
+                <li><a href="/users" class="nav-link">کاربران</a></li>
+                {% endif %}
+                <li><a href="/logout" class="nav-link logout">خروج ({{ user.username }})</a></li>
+            </ul>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="main-content">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.type }}">
+                {{ message.text }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>سیستم مدیریت آنتن - نسخه 2.0.0</p>
+    </footer>
+
+    <script>
+        // WebSocket connection for real-time updates
+        {% if user %}
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws`;
+        const ws = new WebSocket(wsUrl);
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            console.log('WebSocket message:', data);
+
+            // Handle different message types
+            if (data.type === 'notification') {
+                showNotification(data.message);
+            } else if (data.type === 'update') {
+                // Refresh data on the page
+                location.reload();
+            }
+        };
+
+        ws.onclose = function() {
+            console.log('WebSocket connection closed');
+        };
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        {% endif %}
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

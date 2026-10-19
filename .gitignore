@@ -1,0 +1,46 @@
+﻿# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+venv/
+.venv/
+env/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Real data / exports
+*.xlsx
+*.xls
+*.csv
+
+# Frontend dependencies and builds
+node_modules/
+dist/
+frontend_dist/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# IDE
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test / cache
+.pytest_cache/
+.coverage
+htmlcov/

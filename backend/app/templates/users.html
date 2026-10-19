@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت کاربران{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1>مدیریت کاربران</h1>
+        {% if user.user_type == 'owner' %}
+        <button class="btn btn-primary" onclick="showAddUserForm()">+ کاربر جدید</button>
+        {% endif %}
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    <div class="filters-section">
+        <form method="GET" class="filters-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>جستجو:</label>
+                    <input type="text" name="search" value="{{ search or '' }}" placeholder="نام، نام خانوادگی یا نام کاربری">
+                </div>
+
+                <button type="submit" class="btn btn-primary">جستجو</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>شناسه</th>
+                    <th>نام</th>
+                    <th>نام خانوادگی</th>
+                    <th>نام کاربری</th>
+                    <th>نوع کاربر</th>
+                    <th>وضعیت</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if users %}
+                    {% for u in users %}
+                    <tr>
+                        <td>{{ u.personal_id }}</td>
+                        <td>{{ u.user_first_name }}</td>
+                        <td>{{ u.user_last_name }}</td>
+                        <td>{{ u.username }}</td>
+                        <td>
+                            {% if u.user_type == 'owner' %}
+                            <span class="status status-success">مالک</span>
+                            {% elif u.user_type == 'admin' %}
+                            <span class="status status-warning">ادمین</span>
+                            {% else %}
+                            <span class="status">کاربر عادی</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if u.is_active %}
+                            <span class="status status-success">فعال</span>
+                            {% else %}
+                            <span class="status status-danger">غیرفعال</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.user_type == 'owner' %}
+                            <button onclick="editUser({{ u.personal_id }})" class="btn btn-sm btn-warning">ویرایش</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 2rem;">
+                            <p>هیچ کاربری یافت نشد</p>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add User Modal (Only for owner) -->
+{% if user.user_type == 'owner' %}
+<div id="addUserModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddUserForm()">&times;</span>
+        <h2>افزودن کاربر جدید</h2>
+
+        <form method="POST" action="/users/create" class="user-form">
+            <div class="form-group">
+                <label>شناسه کاربری:</label>
+                <input type="number" name="personal_id" required>
+            </div>
+
+            <div class="form-group">
+                <label>نام:</label>
+                <input type="text" name="user_first_name" required>
+            </div>
+
+            <div class="form-group">
+                <label>نام خانوادگی:</label>
+                <input type="text" name="user_last_name" required>
+            </div>
+
+            <div class="form-group">
+                <label>نام کاربری:</label>
+                <input type="text" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label>رمز عبور:</label>
+                <input type="password" name="password" required>
+            </div>
+
+            <div class="form-group">
+                <label>نوع کاربر:</label>
+                <select name="user_type" required>
+                    <option value="regularUser">کاربر عادی</option>
+                    <option value="admin">ادمین</option>
+                    <option value="owner">مالک</option>
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">افزودن کاربر</button>
+                <button type="button" class="btn btn-secondary" onclick="closeAddUserForm()">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<script>
+    function showAddUserForm() {
+        document.getElementById('addUserModal').style.display = 'block';
+    }
+
+    function closeAddUserForm() {
+        document.getElementById('addUserModal').style.display = 'none';
+    }
+
+    function editUser(id) {
+        // TODO: Implement edit user
+        alert('ویرایش کاربر: ' + id);
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('addUserModal');
+        if (modal && event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}
+

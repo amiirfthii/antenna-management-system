@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <title>داشبورد | سیستم مدیریت آنتن</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', path='css/dashboard.css') }}">
+</head>
+<body>
+<div class="dashboard-root">
+    <!-- سایدبار -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-circle">آ</div>
+            <div class="logo-text">
+                <div class="logo-title">سیستم مدیریت آنتن</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item nav-item--active">
+                <span class="nav-icon">🏠</span>
+                <span>داشبورد</span>
+            </a>
+            <a href="/users" class="nav-item">
+                <span class="nav-icon">👥</span>
+                <span>کاربران</span>
+            </a>
+            <a href="/repairs" class="nav-item">
+                <span class="nav-icon">🛠</span>
+                <span>تعمیرات</span>
+            </a>
+            <a href="/inventory" class="nav-item">
+                <span class="nav-icon">📦</span>
+                <span>انبار</span>
+            </a>
+            <a href="/reports" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>جستجو و گزارش‌گیری</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-chip">
+                <div class="user-avatar">آ</div>
+                <div class="user-info">
+                    <div class="user-name">{{ user.user_first_name }} {{ user.user_last_name }}</div>
+                    <div class="user-role">
+                        {% if user.user_type == 'owner' %}مالک سیستم{% elif user.user_type == 'admin' %}مدیر{% else %}کاربر{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <a href="/logout" class="logout-btn">
+                <span>خروج</span>
+                <span class="logout-icon">⟵</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- محتوای اصلی -->
+    <main class="main">
+        {% set role_label = 'مالک سیستم' if user.user_type == 'owner' else 'مدیر' if user.user_type == 'admin' else 'کاربر' %}
+        <!-- نوار بالا -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <div class="user-pill-header">
+                    {% if profile_photo_url %}
+                    <img class="user-pill-avatar user-pill-avatar--photo"
+                         src="{{ profile_photo_url }}"
+                         alt="{{ user.user_first_name }} {{ user.user_last_name }}">
+                    {% else %}
+                    <div class="user-pill-avatar">{{ user.user_first_name[0] }}</div>
+                    {% endif %}
+                    <div class="user-pill-info">
+                        <span class="user-pill-role">{{ role_label }}</span>
+                        <div class="user-pill-name">{{ user.user_first_name }} {{ user.user_last_name }}</div>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="page-title">داشبورد</h1>
+                    <p class="page-subtitle">وضعیت کلی آنتن‌ها و تعمیرات</p>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="topbar-actions">
+                    <button class="icon-btn" aria-label="تنظیمات">
+                        <span class="icon-gear">⚙️</span>
+                    </button>
+                    <button class="icon-btn" aria-label="اعلان‌ها">
+                        <span class="icon-bell">🔔</span>
+                    </button>
+                </div>
+                <div class="topbar-clock">
+                    <div class="clock-digital" id="digital-clock"></div>
+                    <div class="clock-date">
+                        <span id="clock-date-fa"></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- کارت‌های آمار -->
+        <section class="stats-grid">
+            <article class="stat-card">
+                <div class="stat-icon">📡</div>
+                <div class="stat-label">تعداد آنتن‌های در انتظار</div>
+                <div class="stat-value">
+                    {{ stats.active_repairs if stats else 0 }}
+                </div>
+                <div class="stat-caption">آنتن در صف تعمیر</div>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-label">تعمیرات تکمیل‌شده</div>
+                <div class="stat-value">
+                    {{ stats.completed_repairs if stats else 0 }}
+                </div>
+                <div class="stat-caption">آنتن خارج‌شده از تعمیر</div>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-label">تعداد آیتم‌های انبار</div>
+                <div class="stat-value">
+                    {{ stats.inventory_items if stats else 0 }}
+                </div>
+                <div class="stat-caption">قطعه ثبت‌شده در سیستم</div>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-icon">👤</div>
+                <div class="stat-label">کاربران فعال</div>
+                <div class="stat-value">
+                    {{ stats.total_users if stats else 0 }}
+                </div>
+                <div class="stat-caption">کاربر فعال در سیستم</div>
+            </article>
+        </section>
+
+        <!-- ردیف دوم: ساعت و نمودارها -->
+        <section class="bottom-grid">
+            <!-- کارت ساعت بزرگ -->
+            <article class="time-card">
+                <div class="time-card-header">
+                    <span>تاریخ و زمان</span>
+                </div>
+                <div class="time-card-body">
+                    <div class="analog-clock">
+                        <div class="clock-center"></div>
+                        <div class="hand hand-hour" id="hand-hour"></div>
+                        <div class="hand hand-minute" id="hand-minute"></div>
+                        <div class="hand hand-second" id="hand-second"></div>
+                        <!-- نشانگرهای ساعت -->
+                        {% for i in range(12) %}
+                        <div class="tick tick-{{ i }}"></div>
+                        {% endfor %}
+                    </div>
+                    <div class="time-info">
+                        <div class="time-label">ساعت فعلی</div>
+                        <div class="time-value" id="time-value-fa"></div>
+                        <div class="time-meta">
+                            <span id="time-day-fa"></span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- وضعیت تعمیرات -->
+            <article class="chart-card">
+                <div class="chart-header">
+                    <span>وضعیت تعمیرات</span>
+                    <span class="chart-subtitle">آمار ماه جاری (نمونه نمایشی)</span>
+                </div>
+                <div class="chart-placeholder">
+                    <div class="bar-row">
+                        <div class="bar bar-1"></div>
+                        <div class="bar bar-2"></div>
+                        <div class="bar bar-3"></div>
+                        <div class="bar bar-4"></div>
+                        <div class="bar bar-5"></div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- وضعیت موجودی انبار -->
+            <article class="chart-card">
+                <div class="chart-header">
+                    <span>موجودی انبار</span>
+                    <span class="chart-subtitle">قطعات کم‌موجودی (نمونه نمایشی)</span>
+                </div>
+                <div class="chart-placeholder chart-placeholder--dots">
+                    <div class="dot-row">
+                        <span class="dot dot-warning"></span>
+                        <span>قطعات در آستانه اتمام</span>
+                    </div>
+                    <div class="dot-row">
+                        <span class="dot dot-ok"></span>
+                        <span>قطعات در سطح امن</span>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+</div>
+
+<script src="{{ url_for('static', path='js/dashboard-clock.js') }}"></script>
+</body>
+</html>

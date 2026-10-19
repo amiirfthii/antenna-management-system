@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ورود به سیستم مدیریت آنتن</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- فایل CSS جدید -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='css/login.css') }}"
+    >
+</head>
+<body>
+    <div class="bg-overlay"></div>
+
+    <div class="login-container">
+        <div class="glass-card">
+            <!-- دایره‌ی لوگو (اختیاری) -->
+            <div class="logo-circle">
+                <!-- اگر لوگو نداری، می‌تونی فعلاً این img را حذف کنی -->
+                <img src="{{ url_for('static', path='images/logo.png') }}" alt="لوگو" />
+            </div>
+
+            <h1 class="login-title">ورود به برنامه</h1>
+
+            {% if error %}
+                <div class="error-message">
+                    {{ error }}
+                </div>
+            {% endif %}
+
+            <form method="post" action="/login">
+                <div class="form-field">
+                    <label for="username">نام کاربری</label>
+                    <input
+                        id="username"
+                        name="username"
+                        type="text"
+                        placeholder="نام کاربری خود را وارد کنید"
+                        required
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="password">رمز عبور</label>
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        placeholder="رمز عبور خود را وارد کنید"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="login-button">
+                    ورود
+                </button>
+            </form>
+
+            <p class="version-text">
+                سیستم مدیریت آنتن – نسخه 2.0.0
+            </p>
+        </div>
+    </div>
+</body>
+</html>

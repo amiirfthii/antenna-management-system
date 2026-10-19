@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت تعمیرات{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1>مدیریت تعمیرات</h1>
+        <button class="btn btn-primary" onclick="showAddRepairForm()">+ تعمیر جدید</button>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    <div class="filters-section">
+        <form method="GET" class="filters-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>وضعیت:</label>
+                    <select name="status_filter" onchange="this.form.submit()">
+                        <option value="">همه</option>
+                        <option value="در_انتظار_تایید" {% if status_filter == 'در_انتظار_تایید' %}selected{% endif %}>در انتظار تایید</option>
+                        <option value="فالتی_در_انتظار_تعمیر" {% if status_filter == 'فالتی_در_انتظار_تعمیر' %}selected{% endif %}>فالتی در انتظار تعمیر</option>
+                        <option value="تایید" {% if status_filter == 'تایید' %}selected{% endif %}>تایید</option>
+                        <option value="خروج" {% if status_filter == 'خروج' %}selected{% endif %}>خروج</option>
+                        <option value="نامعلوم" {% if status_filter == 'نامعلوم' %}selected{% endif %}>نامعلوم</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>جستجو (سریال):</label>
+                    <input type="text" name="search" value="{{ search or '' }}" placeholder="شماره سریال آنتن">
+                </div>
+
+                <button type="submit" class="btn btn-primary">فیلتر</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>شماره تعمیر</th>
+                    <th>سریال آنتن</th>
+                    <th>نوع آنتن</th>
+                    <th>سازنده</th>
+                    <th>نوع ورود</th>
+                    <th>تاریخ ورود</th>
+                    <th>وضعیت</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if repairs %}
+                {% for repair in repairs %}
+                <tr>
+                        <td>{{ repair.repair_no }}</td>
+                        <td>{{ repair.antenna_serial_no }}</td>
+                        <td>{{ repair.antenna_type or '-' }}</td>
+                        <td>{{ repair.constructor or '-' }}</td>
+                        <td>{{ repair.antenna_entry_type|replace('_', ' ') }}</td>
+                        <td>{{ repair.entry_date or '-' }}</td>
+                    <td>
+                            <span class="status status-{{ repair.antenna_status|replace('_', '-') }}">
+                                {{ repair.antenna_status|replace('_', ' ') }}
+                        </span>
+                    </td>
+                    <td>
+                            <a href="/repairs/{{ repair.repair_no }}" class="btn btn-sm btn-primary">مشاهده</a>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 2rem;">
+                            <p>هیچ تعمیری یافت نشد</p>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="pagination">
+        {% for page in range(1, total_pages + 1) %}
+        <a href="?page={{ page }}&status_filter={{ status_filter or '' }}&search={{ search or '' }}"
+           class="page-link {% if page == current_page %}active{% endif %}">
+            {{ page }}
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add Repair Modal -->
+<div id="addRepairModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddRepairForm()">&times;</span>
+        <h2>ثبت تعمیر جدید</h2>
+
+        <form method="POST" action="/repairs/create" class="repair-form">
+            <div class="form-group">
+                <label>شماره سریال آنتن:</label>
+                <input type="text" name="antenna_serial_no" required>
+            </div>
+
+            <div class="form-group">
+                <label>نوع آنتن:</label>
+                <select name="antenna_type" required>
+                    <option value="">انتخاب کنید</option>
+                    {% for antenna_type in antenna_types %}
+                    <option value="{{ antenna_type.antenna_type }}">{{ antenna_type.antenna_type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>نوع ورود:</label>
+                <select name="antenna_entry_type" required>
+                    <option value="ورودی_خروجی">ورودی/خروجی</option>
+                    <option value="ورودی_تعمیر">ورودی تعمیر</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>سازنده:</label>
+                <select name="constructor" required>
+                    <option value="">انتخاب کنید</option>
+                    {% for constructor in constructors %}
+                    <option value="{{ constructor.company_constructor }}">{{ constructor.company_constructor }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>تاریخ ورود:</label>
+                <input type="text" name="entry_date" placeholder="1403/01/01" required>
+            </div>
+
+            <div class="form-group">
+                <label>نوع تیلت:</label>
+                <input type="text" name="tilt" placeholder="اختیاری">
+            </div>
+
+            <div class="form-group">
+                <label>کد آیتم:</label>
+                <input type="text" name="item_code" placeholder="اختیاری">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">ثبت تعمیر</button>
+                <button type="button" class="btn btn-secondary" onclick="closeAddRepairForm()">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showAddRepairForm() {
+        document.getElementById('addRepairModal').style.display = 'block';
+    }
+
+    function closeAddRepairForm() {
+        document.getElementById('addRepairModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('addRepairModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

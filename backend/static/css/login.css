@@ -1,0 +1,208 @@
+/* static/css/login.css */
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    direction: rtl;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* پس‌زمینه‌ی تمام‌صفحه با عکس دکل + گرادیان */
+body {
+    background: url("../images/login-bg.jpg") center center / cover no-repeat fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    position: relative;
+}
+
+.bg-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(9, 9, 121, 0.65),
+        rgba(0, 212, 255, 0.35)
+    );
+    z-index: 0;
+}
+
+/* کانتینر وسط صفحه */
+.login-container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 480px;
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+}
+
+/* کارت شیشه‌ای */
+.glass-card {
+    width: 100%;
+    padding: 40px 32px 32px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+    text-align: center;
+}
+
+/* دایره‌ی لوگو */
+.logo-circle {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    margin: 0 auto 24px;
+    background: radial-gradient(circle at 30% 0, #ff9a9e, #fad0c4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.logo-circle img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+/* عنوان */
+.login-title {
+    margin: 0 0 24px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* پیام خطا */
+.error-message {
+    background: rgba(255, 99, 132, 0.12);
+    border: 1px solid rgba(255, 99, 132, 0.6);
+    color: #ffe6ea;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+}
+
+/* فیلدهای فرم */
+.form-field {
+    text-align: right;
+    margin-bottom: 18px;
+}
+
+.form-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: #e5f0ff;
+}
+
+.form-field input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: rgba(0, 0, 0, 0.25);
+    color: #ffffff;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.form-field input::placeholder {
+    color: rgba(230, 235, 245, 0.8);
+}
+
+.form-field input:focus {
+    border-color: #4cc9f0;
+    background: rgba(0, 0, 0, 0.35);
+    box-shadow: 0 0 0 1px rgba(76, 201, 240, 0.65);
+}
+
+/* دکمه ورود (استایل شبیه exe) */
+.login-button {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px 0;
+    border-radius: 18px;
+    border: none;
+    background: linear-gradient(135deg, #00c9a7, #00e3ae);
+    color: #0b2333;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+}
+
+.login-button:hover {
+    filter: brightness(1.05);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
+}
+
+.login-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* متن نسخه پایین کارت */
+.version-text {
+    margin-top: 20px;
+    font-size: 0.8rem;
+    color: rgba(230, 240, 255, 0.8);
+}
+/* ===== پس‌زمینه‌ی تمام صفحه با عکس آنتن (مات) ===== */
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+    /* پس‌زمینه‌ی اصلی را شفاف می‌کنیم، چون الان با ::before و ::after کار می‌کنیم */
+    background: transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+/* لایه‌ی اول: خود عکس، کمی بزرگ‌تر و Blur شده */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("/static/images/logo.png"); /* همین فایلی که الان داخل دایره است */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    filter: blur(4px);
+    transform: scale(1.05); /* برای این‌که لبه‌های Blur دیده نشوند */
+
+    z-index: -2;
+}
+
+/* لایه‌ی دوم: یک گرادیان نیمه‌شفاف روی عکس، برای مات‌تر و قشنگ‌تر شدن */
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(64, 92, 255, 0.55),
+        rgba(120, 220, 255, 0.55)
+    );
+    z-index: -1;
+}

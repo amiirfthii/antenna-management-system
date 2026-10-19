@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت موجودی{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1>مدیریت موجودی</h1>
+        <button class="btn btn-primary" onclick="showAddItemForm()">+ قطعه جدید</button>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    <div class="filters-section">
+        <form method="GET" class="filters-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>نوع انبار:</label>
+                    <select name="arsenal_name" onchange="this.form.submit()">
+                        <option value="">همه</option>
+                        <option value="نو" {% if arsenal_name == 'نو' %}selected{% endif %}>نو</option>
+                        <option value="سالویج" {% if arsenal_name == 'سالویج' %}selected{% endif %}>سالویج</option>
+                        <option value="تجهیزات" {% if arsenal_name == 'تجهیزات' %}selected{% endif %}>تجهیزات</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>جستجو:</label>
+                    <input type="text" name="search" value="{{ search or '' }}" placeholder="نام یا کد قطعه">
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="low_stock" {% if low_stock %}checked{% endif %} onchange="this.form.submit()">
+                        فقط موارد کمبود
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">فیلتر</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>کد قطعه</th>
+                    <th>نام قطعه</th>
+                    <th>نوع انبار</th>
+                    <th>موجودی</th>
+                    <th>وضعیت</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if inventory_items %}
+                {% for item in inventory_items %}
+                <tr>
+                        <td>{{ item.fragment_part_no }}</td>
+                        <td>{{ item.fragment_name }}</td>
+                        <td>{{ item.arsenal_name }}</td>
+                        <td class="{% if item.fragment_qty < 5 %}text-danger{% endif %}">
+                            {{ item.fragment_qty }}
+                    </td>
+                    <td>
+                            {% if item.fragment_qty == 0 %}
+                        <span class="status status-danger">ناموجود</span>
+                            {% elif item.fragment_qty < 5 %}
+                        <span class="status status-warning">کمبود</span>
+                        {% else %}
+                        <span class="status status-success">موجود</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                            <button onclick="showUpdateQuantityForm('{{ item.fragment_part_no }}', '{{ item.arsenal_name }}', '{{ item.fragment_name }}', {{ item.fragment_qty }})" class="btn btn-sm btn-primary">تغییر موجودی</button>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem;">
+                            <p>هیچ قطعه‌ای یافت نشد</p>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Item Modal -->
+<div id="addItemModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddItemForm()">&times;</span>
+        <h2>افزودن قطعه جدید</h2>
+
+        <form method="POST" action="/inventory/create" class="item-form">
+            <div class="form-group">
+                <label>کد قطعه:</label>
+                <input type="text" name="fragment_part_no" required>
+            </div>
+
+            <div class="form-group">
+                <label>نام قطعه:</label>
+                <input type="text" name="fragment_name" required>
+            </div>
+
+            <div class="form-group">
+                <label>نوع انبار:</label>
+                <select name="arsenal_name" required>
+                    <option value="نو">نو</option>
+                    <option value="سالویج">سالویج</option>
+                    <option value="تجهیزات">تجهیزات</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>موجودی اولیه:</label>
+                <input type="number" name="fragment_qty" value="0" required min="0">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">افزودن قطعه</button>
+                <button type="button" class="btn btn-secondary" onclick="closeAddItemForm()">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Update Quantity Modal -->
+<div id="updateQuantityModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeUpdateQuantityForm()">&times;</span>
+        <h2>تغییر موجودی</h2>
+
+        <form method="POST" id="updateQuantityForm" class="item-form">
+            <input type="hidden" name="part_no" id="update_part_no">
+            <input type="hidden" name="arsenal_name" id="update_arsenal_name">
+
+            <div class="form-group">
+                <label>قطعه:</label>
+                <input type="text" id="update_item_name" readonly>
+            </div>
+
+            <div class="form-group">
+                <label>موجودی فعلی:</label>
+                <input type="number" id="current_quantity" readonly>
+            </div>
+
+            <div class="form-group">
+                <label>نوع عملیات:</label>
+                <select name="operation" id="operation" required>
+                    <option value="add">افزودن</option>
+                    <option value="subtract">کاهش</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>مقدار:</label>
+                <input type="number" name="amount" required min="1">
+            </div>
+
+            <div class="form-group">
+                <label>توضیحات:</label>
+                <textarea name="note" rows="2"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">ثبت تغییرات</button>
+                <button type="button" class="btn btn-secondary" onclick="closeUpdateQuantityForm()">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showAddItemForm() {
+        document.getElementById('addItemModal').style.display = 'block';
+    }
+
+    function closeAddItemForm() {
+        document.getElementById('addItemModal').style.display = 'none';
+    }
+
+    function showUpdateQuantityForm(partNo, arsenalName, itemName, quantity) {
+        document.getElementById('update_part_no').value = partNo;
+        document.getElementById('update_arsenal_name').value = arsenalName;
+        document.getElementById('update_item_name').value = itemName;
+        document.getElementById('current_quantity').value = quantity;
+        document.getElementById('updateQuantityForm').action = '/inventory/' + partNo + '/' + arsenalName + '/update-quantity';
+        document.getElementById('updateQuantityModal').style.display = 'block';
+    }
+
+    function closeUpdateQuantityForm() {
+        document.getElementById('updateQuantityModal').style.display = 'none';
+    }
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        const addModal = document.getElementById('addItemModal');
+        const updateModal = document.getElementById('updateQuantityModal');
+
+        if (event.target == addModal) {
+            addModal.style.display = 'none';
+        }
+        if (event.target == updateModal) {
+            updateModal.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}
